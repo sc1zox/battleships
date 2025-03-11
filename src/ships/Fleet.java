@@ -35,4 +35,13 @@ public class Fleet {
     public void removeShip(String name) {
         ships.remove(name);
     }
+
+    public boolean isAlive() {
+        for ( Ship ship : ships.values()){
+            if (ship.isAlive()){
+                return true;
+            }
+        }
+        return false;
+    }
 }

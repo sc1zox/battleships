@@ -107,16 +107,25 @@ public class Board {
         return false;
     }
 
-    public void bomb(Coordinate bomb) throws BombException {
+    public boolean bomb(Coordinate bomb) {
+        Field tmp = this.playerBoard[bomb.getPositionX()][bomb.getPositionY()];
+
+        if (tmp.isShip()) {
+            tmp.getShip().hit();
+            return true;
+        }
+        return false;
+    }
+    public Field getFieldFromCoordinate(Coordinate target){
+        return this.playerBoard[target.getPositionX()][target.getPositionY()];
+    }
+
+    public void markFieldAsBombed(Coordinate bomb) throws BombException{
         Field tmp = this.playerBoard[bomb.getPositionX()][bomb.getPositionY()];
 
         if (tmp.getWasBombed()) {
-            throw new BombException("Position (" + bomb.getPositionX() + "," + bomb.getPositionY() + ") wurde bereits bombardiert.");
+            throw new BombException("\n Position (" + bomb.getPositionX() + "," + bomb.getPositionY() + ") wurde bereits bombardiert.");
         }
-
         tmp.setWasBombed(true);
-        if (tmp.isShip()) {
-            tmp.getShip().hit();
-        }
     }
 }

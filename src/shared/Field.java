@@ -5,7 +5,6 @@ import ships.Ship;
 public class Field {
 
     private Ship ship;
-    private boolean isShip = false;
     private boolean wasBombed = false;
 
     public Ship getShip() {
