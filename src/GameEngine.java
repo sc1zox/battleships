@@ -170,7 +170,7 @@ public class GameEngine {
         Coordinate end = null;
         try{
             start = inputCoordinateDialogue();
-            end = calculateEndCoordinate(start, orientation, shipToPlace, turn);
+            end = calculateEndCoordinate(start, orientation, shipToPlace);
 
             System.out.println("Du hast die Koordinaten gewählt: Start (" + start.getPositionX() + ", " + start.getPositionY() + ") - Ende (" + end.getPositionX() + ", " + end.getPositionY() + ")"+ orientation);
 
