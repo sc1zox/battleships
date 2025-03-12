@@ -53,9 +53,8 @@ public class GameEngine {
     }
 
     private void placementPhase(int turn){
-        //TODO replace 1 with lengthOfFleet
         int lengthOfFleet = this.gameTurn[currentPlayer].getPlayerFleet().getShips().keySet().toArray().length;
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < lengthOfFleet; i++) {
             placeShip(turn);
         }
     }
@@ -117,7 +116,7 @@ public class GameEngine {
 
             if (!this.gameTurn[currentPlayer].getPlayerFleet().isAlive() ||
                     !this.gameTurn[enemy].getPlayerFleet().isAlive()) {
-                System.out.println("Spiel beendet! " + this.gameTurn[enemy].getName() + " hat gewonnen.");
+                System.out.println("Spiel beendet! " + this.gameTurn[currentPlayer].getName() + " hat gewonnen.");
                 closeScanner();
                 return;
             }
