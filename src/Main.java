@@ -4,8 +4,8 @@ public class Main {
 
         Initiator start = new Initiator();
         start.init(8);
-        GameEngine game = new GameEngine(start.player1, start.player2,8);
+        GameEngine game = new GameEngine(start.getPlayer1(), start.getPlayer2(),8);
         game.initializationPhase();
-        game.playTurn();
+        game.playTurn(); //TODO iwie einen Gamemode passen um die Schifflänge und anzahl zu bestimmen
     }
     }

@@ -10,11 +10,10 @@ public class Ship {
     private Types name;
 
 
-    public Ship(int length, Orientation ori, Types name){
+    public Ship(int length, Types name){
         this.length = length;
         this.health = length;
         this.isPlaced = false;
-        this.orientation = ori;
         this.name = name;
     }
 

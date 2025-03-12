@@ -70,7 +70,7 @@ public class GameEngine {
         evaluatePlayerTurn();
     }
 
-
+    //TODO Namen auf null checken bzw falsche Eingabe
     private void setNamesAndIntroduction(){
         System.out.println("Willkommen zum Spiel!");
 
@@ -143,8 +143,7 @@ public class GameEngine {
         System.out.print(p1 + ", drücke ENTER, um deinen Zug zu starten...");
         scanner.nextLine();
 
-        Map<String, Ship> ship = this.gameTurn[turn].getPlayerFleet().getShips();
-        Ship shipToPlace = ship.get(this.choiceShip());
+        Ship shipToPlace = this.choiceShip();
         Coordinate[] startAndEnd = null;
 
         while (startAndEnd == null) {
@@ -220,7 +219,7 @@ public class GameEngine {
             try {
                 System.out.print("\n X-Koordinate (A-" + LetterToNumber.getLetterFromNumber(this.sizeOfBoard) + "): ");
                 String input = scanner.nextLine().trim().toUpperCase();
-                if (input.length() != 1 || input.charAt(0) < 'A' || input.charAt(0) > 'Z') {
+                if (input.length() != 1 || input.charAt(0) < 'A' || input.charAt(0) > LetterToNumber.getLetterFromNumber(this.sizeOfBoard)) {
                     throw new IllegalArgumentException("Fehler: Bitte einen gültigen Buchstaben A-Z eingeben.");
                 }
                 startY = LetterToNumber.getNumberFromLetter(input.charAt(0)) - 1;
@@ -273,11 +272,12 @@ public class GameEngine {
 
 
 
-    private String choiceShip() {
+    private Ship choiceShip() {
         System.out.print("drücke ENTER, um dein Schiff zu platzieren...");
         scanner.nextLine();
         String[] ships = this.gameTurn[currentPlayer].getPlayerFleet().getShipNames().toArray(new String[0]);
         Map<String,Ship> shipMap = this.gameTurn[currentPlayer].getPlayerFleet().getShips();
+        Types[] shipTypes = Types.values();
 
         while (true) {
             System.out.println("\nWähle ein Schiff (1-5). Drücke 6 zum Beenden.");
@@ -286,23 +286,50 @@ public class GameEngine {
             try {
                 int choice = Integer.parseInt(scanner.nextLine());
                 //TODO refaktorieren weil hier kein spieler String array exisitiert und hier Types referenziert werden soll ebenso die Bedingung für invalide Eingabe
-                if (choice >= 1 && choice <= ships.length) {
-                    if(shipMap.get(ships[choice - 1]).isPlaced()){
+                if (choice >= 1 && choice <= shipTypes.length) {
+                    if(!shipMap.isEmpty()&&shipMap.get(ships[choice - 1]).isPlaced()){
                         throw new ShipPlacementException("Ship is already placed. Choose another one");
                     }
-                    return ships[choice - 1];
-                } else if (choice == 6) {
-                    System.out.println("Schiffsauswahl abgebrochen.");
-                    return "";
-                } else {
-                    System.err.println("Ungültige Auswahl. Bitte eine Zahl zwischen 1 und " + ships.length + " eingeben.");
+                    return createShip(shipTypes[choice-1]);
+                }else {
+                    System.err.println("Ungültige Auswahl. Bitte eine Zahl zwischen 1 und " + shipTypes.length + " eingeben.");
                 }
             } catch (NumberFormatException e) {
                 System.err.println("Fehler: Bitte eine gültige Zahl eingeben.");
             } catch (ShipPlacementException e) {
-                System.err.println("Fehler: Das Schiff wurde schon platziertd. Bitte erneut wählen");
+                System.err.println("Fehler: Das Schiff wurde schon platziert. Bitte erneut wählen");
             }
         }
+    }
+
+    private Ship createShip(Types ship){
+        return switch (ship) {
+            case MINI -> {
+                Ship createShip = new Ship(2, ship);
+                this.gameTurn[currentPlayer].getPlayerFleet().addShip(ship.name(),createShip);
+                yield createShip;
+            }
+            case YACHT -> {
+                Ship createShip = new Ship(3, ship);
+                this.gameTurn[currentPlayer].getPlayerFleet().addShip(ship.name(),createShip);
+                yield createShip;
+            }
+            case CRUISER -> {
+                Ship createShip = new Ship(4, ship);
+                this.gameTurn[currentPlayer].getPlayerFleet().addShip(ship.name(),createShip);
+                yield createShip;
+            }
+            case WARSHIP -> {
+                Ship createShip = new Ship(5, ship);
+                this.gameTurn[currentPlayer].getPlayerFleet().addShip(ship.name(),createShip);
+                yield createShip;
+            }
+            case BATTLECRUISER -> {
+                Ship createShip = new Ship(6, ship);
+                this.gameTurn[currentPlayer].getPlayerFleet().addShip(ship.name(),createShip);
+                yield createShip;
+            }
+        };
     }
 
     private void closeScanner(){

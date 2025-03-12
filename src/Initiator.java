@@ -3,8 +3,8 @@ import shared.Player;
 import ships.Fleet;
 
 public class Initiator {
-    public Player player1;
-    public Player player2;
+    private Player player1;
+    private Player player2;
 
     public Initiator(){
         player1 = new Player();
@@ -22,4 +22,19 @@ public class Initiator {
         this.player2.setPlayerFleet(playerFleet2);
     }
 
+    public Player getPlayer1() {
+        return player1;
+    }
+
+    public Player getPlayer2() {
+        return player2;
+    }
+
+    public void setPlayer1(Player player1) {
+        this.player1 = player1;
+    }
+
+    public void setPlayer2(Player player2) {
+        this.player2 = player2;
+    }
 }
