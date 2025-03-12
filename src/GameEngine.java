@@ -5,24 +5,31 @@ import shared.LetterToNumber;
 import shared.Player;
 import ships.Ship;
 import ships.Orientation;
+import ships.Types;
 
-import java.util.Map;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
 
 public class GameEngine {
 
     private Player[] gameTurn;
     private final Scanner scanner = new Scanner(System.in);
-    private int sizeOfBoard;
+    private final int sizeOfBoard;
+    private int currentPlayer;
+    private final Random random;
 
     public GameEngine(Player p1, Player p2,int sizeOfBoard){
         this.gameTurn = new Player[2];
         this.gameTurn[0] = p1;
         this.gameTurn[1] = p2;
         this.sizeOfBoard = sizeOfBoard;
+        random = new Random();
+        determineStartingPlayer();
     }
 
+    public void determineStartingPlayer() {
+        currentPlayer = random.nextInt(2);
+        System.out.println("Spieler " + (currentPlayer + 1) + " beginnt das Spiel!");
+    }
 
     public Player[] getGameTurn() {
         return gameTurn;
@@ -33,27 +40,36 @@ public class GameEngine {
     }
 
     public void initializationPhase() {
-        Set<String> f1 = this.gameTurn[0].getPlayerFleet().getShipNames();
-        Set<String> f2 = this.gameTurn[1].getPlayerFleet().getShipNames();
-
-        int lengthOfFleet = f1.size();
-
         setNamesAndIntroduction();
 
-        placementPhase(0,lengthOfFleet);// turn based impl missing
+        placementPhase(currentPlayer);
         System.out.println("All ships placed for Player 1");
-        placementPhase(1,lengthOfFleet); // turn based impl missing also not really working?
+        switchPlayer();
+        placementPhase(currentPlayer);
         System.out.println("All ships placed for Player 2");
+        switchPlayer();
         this.gameTurn[0].getPlayerBoard().displayBoard(); //tmp um map anzuzeigen
         this.gameTurn[1].getPlayerBoard().displayBoard(); //tmp um map anzuzeigen
     }
 
-    //TODO replace 1 with lengthOfFleet
-    private void placementPhase(int turn,int lengthOfFleet){
+    private void placementPhase(int turn){
+        //TODO replace 1 with lengthOfFleet
+        int lengthOfFleet = this.gameTurn[currentPlayer].getPlayerFleet().getShips().keySet().toArray().length;
         for (int i = 0; i < 1; i++) {
             placeShip(turn);
         }
     }
+
+    private void switchPlayer() {
+        currentPlayer = (currentPlayer == 0) ? 1 : 0;
+        System.out.println("Spielerwechsel: Jetzt ist Spieler " + (currentPlayer + 1) + " am Zug.");
+    }
+
+    public void playTurn() {
+        System.out.println("Spieler " + (currentPlayer + 1) + " ist am Zug.");
+        evaluatePlayerTurn();
+    }
+
 
     private void setNamesAndIntroduction(){
         System.out.println("Willkommen zum Spiel!");
@@ -70,12 +86,12 @@ public class GameEngine {
 
     private int askPlayerWhatToBomb(int turn,int enemy){
         this.gameTurn[turn].getPlayerBoard().displayBoard();
-        System.out.print("Spieler: "+this.gameTurn[turn].getName()+ " Bestimme die Koordinaten um zu bombardieren");
+        System.out.print("\n Spieler: "+this.gameTurn[turn].getName()+ " Bestimme die Koordinaten um zu bombardieren");
 
-        boolean isHit;
+        boolean isHit = false;
         Coordinate target;
 
-        while (true) {
+        while (this.gameTurn[currentPlayer].getPlayerFleet().isAlive() && this.gameTurn[enemy].getPlayerFleet().isAlive()) {
             target = inputCoordinateDialogue();
             try {
                 this.gameTurn[turn].getPlayerBoard().markFieldAsBombed(target);
@@ -83,39 +99,42 @@ public class GameEngine {
                 break; // Erfolgreiche Bombe -> aus der Schleife rausgehen
             } catch (BombException e) {
                 System.err.println(e.getMessage());
-                System.out.println("Bitte wähle eine andere Koordinate.");
+                System.out.println("\n Bitte wähle eine andere Koordinate.");
             }
         }
 
         if (isHit) {
-            System.out.println("Bomb getroffen! Du bist nochmal dran.");
+            System.out.println("\n Bomb getroffen! Du bist nochmal dran.");
             return turn;
         }
-        System.out.println("Bomb verfehlt! Nächster Spieler ist dran.");
+        System.out.println("\n Bomb verfehlt! Nächster Spieler ist dran.");
         return enemy;
     }
 
-    public void evaluatePlayerTurn(int turn) {
-        int enemy = (turn == 0) ? 1 : 0;
+    public void evaluatePlayerTurn() {
+        while (true) {
+            int enemy = (currentPlayer == 0) ? 1 : 0;
 
-        if (!this.gameTurn[turn].getPlayerFleet().isAlive() || !this.gameTurn[enemy].getPlayerFleet().isAlive()) {
-            System.out.println("Spiel beendet! " + this.gameTurn[enemy].getName() + " hat gewonnen.");
-            closeScanner();
-            return;
+            if (!this.gameTurn[currentPlayer].getPlayerFleet().isAlive() ||
+                    !this.gameTurn[enemy].getPlayerFleet().isAlive()) {
+                System.out.println("Spiel beendet! " + this.gameTurn[enemy].getName() + " hat gewonnen.");
+                closeScanner();
+                return;
+            }
+
+            int nextPlayer = askPlayerWhatToBomb(currentPlayer, enemy);
+
+            System.out.println("Press Ü to display boards");
+            if (scanner.nextLine().equals("Ü")) {
+                this.gameTurn[0].getPlayerBoard().displayBoard();
+                this.gameTurn[1].getPlayerBoard().displayBoard();
+            }
+
+            if (nextPlayer != currentPlayer) {
+                switchPlayer();
+            }
         }
-
-        int newTurn = askPlayerWhatToBomb(turn, enemy);
-
-        System.out.println("Press Ü to display boards");
-        if(scanner.nextLine().equals("Ü")){
-            this.gameTurn[0].getPlayerBoard().displayBoard();
-            this.gameTurn[1].getPlayerBoard().displayBoard();
-        }
-
-        evaluatePlayerTurn(newTurn);
     }
-
-
 
     private void placeShip(int turn) {
 
@@ -125,61 +144,66 @@ public class GameEngine {
         scanner.nextLine();
 
         Map<String, Ship> ship = this.gameTurn[turn].getPlayerFleet().getShips();
-        Ship shipToPlace = ship.get(this.choiceShip(turn));
-        Coordinate[] startAndEnd = getCoordinatesForShipPlacingDialogue(shipToPlace, turn);
-        try {
-            this.gameTurn[turn].getPlayerBoard().positionShip(startAndEnd[0],startAndEnd[1],shipToPlace,shipToPlace.getOrientation());
-            shipToPlace.setPlaced(true);
-        } catch (ShipPlacementException e) {
-            System.err.println(e.getMessage());
-            System.err.println("ERROR PLACING GAME ENGINGE TEMP");
+        Ship shipToPlace = ship.get(this.choiceShip());
+        Coordinate[] startAndEnd = null;
+
+        while (startAndEnd == null) {
+            try {
+                startAndEnd = getCoordinatesForShipPlacingDialogue(shipToPlace, turn);
+                this.gameTurn[turn].getPlayerBoard().positionShip(startAndEnd[0], startAndEnd[1], shipToPlace, shipToPlace.getOrientation());
+                shipToPlace.setPlaced(true);
+            } catch (ShipPlacementException e) {
+                System.err.println(e.getMessage() + "Bitte erneut eingeben: \n");
+            }
         }
     }
 
-    private void printShipNames(){
-        Set<String> ships = this.gameTurn[0].getPlayerFleet().getShipNames();
+
+    private void printShipNames() {
+        Types[] shipTypes = Types.values();
+        Map<String, Ship> ships = this.gameTurn[currentPlayer].getPlayerFleet().getShips();
+
         int number = 1;
-        for (String ship : ships) {
-            System.out.println(number+". "+ship);
-            number++;
+        for (Types type : shipTypes) {
+            if(ships.get(type.name()) == null) {
+                System.out.println(number + ". " + type.name());
+                number++;
+            }
         }
     }
 
-    private Coordinate[] getCoordinatesForShipPlacingDialogue(Ship shipToPlace, int turn) {
+
+    private Coordinate[] getCoordinatesForShipPlacingDialogue(Ship shipToPlace, int turn) throws ShipPlacementException {
         this.gameTurn[turn].getPlayerBoard().displayBoard();
 
         System.out.println("Gib die Koordinaten ein, um dein Schiff " + shipToPlace.getName() +
                 " zu platzieren. Es hat die Länge: " + shipToPlace.getLength());
 
-        System.out.println("Gib zuerst an, ob das Schiff VERTIKAL oder HORIZONTAL platziert werden soll:");
+        System.out.println("Gib zuerst an, ob das Schiff VERTIKAL(v) oder HORIZONTAL(h) platziert werden soll:");
         Orientation orientation = null;
 
-        while (true) {
+        while (orientation == null) {
             try {
-                orientation = orientation.valueOf(scanner.nextLine().toUpperCase());
+                String input = scanner.nextLine().trim().toUpperCase();
+                if (input.equals("V")){
+                    orientation = Orientation.VERTIKAL;
+                } else if (input.equals("H")) {
+                    orientation = Orientation.HORIZONTAL;
+                } else {
+                    throw new IllegalArgumentException("Fehler: Falsche Eingabe");
+                }
                 shipToPlace.setOrientation(orientation);
-                break;
             } catch (IllegalArgumentException e) {
                 System.err.println("Fehler: Ungültige Eingabe. Bitte gib VERTICAL oder HORIZONTAL ein.");
-            } catch (NullPointerException e) {
-                System.err.println(e.getMessage());
-                System.err.println("Orientation ran into an error");
             }
         }
         Coordinate start = null;
         Coordinate end = null;
-        try{
+
             start = inputCoordinateDialogue();
             end = calculateEndCoordinate(start, orientation, shipToPlace);
 
             System.out.println("Du hast die Koordinaten gewählt: Start (" + start.getPositionX() + ", " + start.getPositionY() + ")"+ orientation);
-
-        }catch (ShipPlacementException e) {
-            System.err.println(e.getMessage());
-            System.out.println("Bitte wähle eine andere Position.");
-        } catch (NullPointerException e) {
-            System.err.println("End calc method broke pls fix");
-        }
 
         return new Coordinate[] {
                 start,
@@ -249,11 +273,11 @@ public class GameEngine {
 
 
 
-    private String choiceShip(int turn) {
+    private String choiceShip() {
         System.out.print("drücke ENTER, um dein Schiff zu platzieren...");
         scanner.nextLine();
-        String[] ships = this.gameTurn[turn].getPlayerFleet().getShipNames().toArray(new String[0]);
-        Map<String,Ship> shipMap = this.gameTurn[turn].getPlayerFleet().getShips();
+        String[] ships = this.gameTurn[currentPlayer].getPlayerFleet().getShipNames().toArray(new String[0]);
+        Map<String,Ship> shipMap = this.gameTurn[currentPlayer].getPlayerFleet().getShips();
 
         while (true) {
             System.out.println("\nWähle ein Schiff (1-5). Drücke 6 zum Beenden.");
@@ -261,7 +285,7 @@ public class GameEngine {
 
             try {
                 int choice = Integer.parseInt(scanner.nextLine());
-
+                //TODO refaktorieren weil hier kein spieler String array exisitiert und hier Types referenziert werden soll ebenso die Bedingung für invalide Eingabe
                 if (choice >= 1 && choice <= ships.length) {
                     if(shipMap.get(ships[choice - 1]).isPlaced()){
                         throw new ShipPlacementException("Ship is already placed. Choose another one");

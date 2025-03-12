@@ -29,6 +29,8 @@ public class Board {
                     System.out.print(" X");
                 } else if (playerBoard[i][j].isShip()) {
                     System.out.print(" O");
+                } else if (playerBoard[i][j].isShip() && playerBoard[i][j].getWasBombed()) {
+                    System.out.println(" ⨂");
                 } else {
                     System.out.print(" .");
                 }
@@ -73,6 +75,9 @@ public class Board {
     public boolean checkPlacement(Coordinate positionStart, Coordinate positionEnd, Ship ship) throws ShipPlacementException {
         switch (ship.getOrientation()) {
             case VERTIKAL:
+                if(positionStart == null || positionEnd == null){
+                    return false;
+                }
                 if (positionStart.getPositionY() != positionEnd.getPositionY()) return false;
 
                 int lengthPlacementHorizontal = positionEnd.getPositionX() - positionStart.getPositionX() + 1;
@@ -89,6 +94,9 @@ public class Board {
                 return true;
 
             case HORIZONTAL:
+                if(positionStart == null || positionEnd == null){
+                    return false;
+                }
                 if (positionStart.getPositionX() != positionEnd.getPositionX()) return false;
 
                 int lengthPlacementVertical = positionEnd.getPositionY() - positionStart.getPositionY() + 1;

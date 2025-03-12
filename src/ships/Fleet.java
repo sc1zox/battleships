@@ -8,13 +8,13 @@ public class Fleet {
 
     private HashMap<String, Ship> ships = new HashMap<>();
 
-    public Fleet() {
+    /*public Fleet() {
         ships.put("Mini", new Ship(2, Orientation.HORIZONTAL, Types.MINI));
         ships.put("Yacht", new Ship(3, Orientation.HORIZONTAL, Types.YACHT));
         ships.put("Cruiser", new Ship(4, Orientation.VERTIKAL, Types.CRUISER));
         ships.put("Warship", new Ship(5, Orientation.VERTIKAL, Types.WARSHIP));
         ships.put("Battlecruiser", new Ship(6, Orientation.HORIZONTAL, Types.BATTLECRUISER));
-    }
+    }*/
 
     public Map<String, Ship> getShips() {
         return ships;
