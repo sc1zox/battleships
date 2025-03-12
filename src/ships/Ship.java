@@ -6,11 +6,11 @@ public class Ship {
     private int health;
     private boolean isAlive = true;
     private boolean isPlaced;
-    private orientation orientation;
-    private types name;
+    private Orientation orientation;
+    private Types name;
 
 
-    public Ship(int length, orientation ori,types name){
+    public Ship(int length, Orientation ori, Types name){
         this.length = length;
         this.health = length;
         this.isPlaced = false;
@@ -18,7 +18,7 @@ public class Ship {
         this.name = name;
     }
 
-    public void setOrientation(orientation orientation) {
+    public void setOrientation(Orientation orientation) {
         this.orientation = orientation;
     }
 
@@ -30,7 +30,7 @@ public class Ship {
         isPlaced = placed;
     }
 
-    public types getName() {
+    public Types getName() {
         return name;
     }
 
@@ -54,7 +54,7 @@ public class Ship {
         return health;
     }
 
-    public orientation getOrientation() {
+    public Orientation getOrientation() {
         return orientation;
     }
 

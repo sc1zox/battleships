@@ -2,7 +2,7 @@ package shared;
 import errors.BombException;
 import errors.ShipPlacementException;
 import ships.Ship;
-import ships.orientation;
+import ships.Orientation;
 
 public class Board {
 
@@ -18,11 +18,11 @@ public class Board {
     }
 
     public void displayBoard() {
-        System.out.println("   1 2 3 4 5 6 7 8");
+        System.out.println("   A B C D E F G H");
         System.out.println("  -----------------");
 
         for (int i = 0; i < playerBoard.length; i++) {
-            System.out.print((LetterToNumber.getLetterFromNumber(i+1)) + " |");
+            System.out.print(i+1 + " |");
 
             for (int j = 0; j < playerBoard[i].length; j++) {
                 if (playerBoard[i][j].getWasBombed()) {
@@ -48,7 +48,7 @@ public class Board {
         }
     }
 
-    public void positionShip(Coordinate positionStart, Coordinate positionEnd, Ship ship, orientation orientation) throws ShipPlacementException {
+    public void positionShip(Coordinate positionStart, Coordinate positionEnd, Ship ship, Orientation orientation) throws ShipPlacementException {
         if (!checkPlacement(positionStart, positionEnd, ship)) {
             throw new ShipPlacementException("Ungültige Platzierung für Schiff: " + ship.getName() +
                     " von (" + positionStart.getPositionX() + "," + positionStart.getPositionY() + ") bis (" +
@@ -56,13 +56,13 @@ public class Board {
         }
         ship.setOrientation(orientation);
         switch (ship.getOrientation()) {
-            case VERTICAL:
+            case HORIZONTAL:
                 for (int i = positionStart.getPositionY(); i <= positionEnd.getPositionY(); i++) {
                     this.playerBoard[positionStart.getPositionX()][i].setShip(ship);
                 }
                 break;
 
-            case HORIZONTAL:
+            case VERTIKAL:
                 for (int i = positionStart.getPositionX(); i <= positionEnd.getPositionX(); i++) {
                     this.playerBoard[i][positionStart.getPositionY()].setShip(ship);
                 }
@@ -72,7 +72,7 @@ public class Board {
 
     public boolean checkPlacement(Coordinate positionStart, Coordinate positionEnd, Ship ship) throws ShipPlacementException {
         switch (ship.getOrientation()) {
-            case HORIZONTAL:
+            case VERTIKAL:
                 if (positionStart.getPositionY() != positionEnd.getPositionY()) return false;
 
                 int lengthPlacementHorizontal = positionEnd.getPositionX() - positionStart.getPositionX() + 1;
@@ -88,7 +88,7 @@ public class Board {
                 }
                 return true;
 
-            case VERTICAL:
+            case HORIZONTAL:
                 if (positionStart.getPositionX() != positionEnd.getPositionX()) return false;
 
                 int lengthPlacementVertical = positionEnd.getPositionY() - positionStart.getPositionY() + 1;

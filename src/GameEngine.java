@@ -4,7 +4,7 @@ import shared.Coordinate;
 import shared.LetterToNumber;
 import shared.Player;
 import ships.Ship;
-import ships.orientation;
+import ships.Orientation;
 
 import java.util.Map;
 import java.util.Scanner;
@@ -151,8 +151,8 @@ public class GameEngine {
         System.out.println("Gib die Koordinaten ein, um dein Schiff " + shipToPlace.getName() +
                 " zu platzieren. Es hat die Länge: " + shipToPlace.getLength());
 
-        System.out.println("Gib zuerst an, ob das Schiff VERTICAL oder HORIZONTAL platziert werden soll:");
-        orientation orientation = null;
+        System.out.println("Gib zuerst an, ob das Schiff VERTIKAL oder HORIZONTAL platziert werden soll:");
+        Orientation orientation = null;
 
         while (true) {
             try {
@@ -172,7 +172,7 @@ public class GameEngine {
             start = inputCoordinateDialogue();
             end = calculateEndCoordinate(start, orientation, shipToPlace);
 
-            System.out.println("Du hast die Koordinaten gewählt: Start (" + start.getPositionX() + ", " + start.getPositionY() + ") - Ende (" + end.getPositionX() + ", " + end.getPositionY() + ")"+ orientation);
+            System.out.println("Du hast die Koordinaten gewählt: Start (" + start.getPositionX() + ", " + start.getPositionY() + ")"+ orientation);
 
         }catch (ShipPlacementException e) {
             System.err.println(e.getMessage());
@@ -225,7 +225,7 @@ public class GameEngine {
         return x >= 0 && x < this.sizeOfBoard && y >= 0 && y < this.sizeOfBoard;
     }
 
-    private Coordinate calculateEndCoordinate(Coordinate start, orientation ori, Ship ship) throws ShipPlacementException {
+    private Coordinate calculateEndCoordinate(Coordinate start, Orientation ori, Ship ship) throws ShipPlacementException {
         if (start == null || ori == null || ship == null) {
             throw new IllegalArgumentException("Fehler: Einer der Parameter ist null.");
         }
@@ -233,7 +233,7 @@ public class GameEngine {
         int endX = start.getPositionX();
         int endY = start.getPositionY();
 
-        if (ori == orientation.HORIZONTAL) {
+        if (ori == Orientation.VERTIKAL) {
             endX = start.getPositionX() + ship.getLength() - 1;
         } else {
             endY = start.getPositionY() + ship.getLength() - 1;

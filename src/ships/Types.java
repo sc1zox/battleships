@@ -1,6 +1,6 @@
 package ships;
 
-public enum types {
+public enum Types {
     MINI,
     YACHT,
     CRUISER,
