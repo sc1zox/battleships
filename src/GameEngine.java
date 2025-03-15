@@ -53,7 +53,7 @@ public class GameEngine {
     }
 
     private void placementPhase(int turn){
-        int lengthOfFleet = this.gameTurn[currentPlayer].getPlayerFleet().getShips().keySet().toArray().length;
+        int lengthOfFleet = Types.values().length;
         for (int i = 0; i < lengthOfFleet; i++) {
             placeShip(turn);
         }
